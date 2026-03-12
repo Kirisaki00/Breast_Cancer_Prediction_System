@@ -231,7 +231,6 @@ Example request
 }
 ```
 <img width="1773" height="988" alt="image" src="https://github.com/user-attachments/assets/9bd04a2b-6261-4cb9-8224-9456b7343a48" />
-<img width="1773" height="988" alt="image" src="https://github.com/user-attachments/assets/9bd04a2b-6261-4cb9-8224-9456b7343a48" />
 
 ---
 
