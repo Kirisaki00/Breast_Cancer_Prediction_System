@@ -120,9 +120,7 @@ Example prediction output:
 
 # Screenshot
 
-![Prediction Interface](screenshot.png)
-
-You can replace the screenshot file with an image of your web application UI.
+<img width="1773" height="988" alt="image" src="https://github.com/user-attachments/assets/9bd04a2b-6261-4cb9-8224-9456b7343a48" />
 
 ---
 
@@ -230,7 +228,6 @@ Example request
  "aurka":3.4
 }
 ```
-<img width="1773" height="988" alt="image" src="https://github.com/user-attachments/assets/9bd04a2b-6261-4cb9-8224-9456b7343a48" />
 
 ---
 
