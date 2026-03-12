@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oncology Risk Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --surface: #12161f;
+    --surface2: #1a1f2e;
+    --border: #242a38;
+    --accent: #4f9cf9;
+    --accent2: #a78bfa;
+    --danger: #f87171;
+    --safe: #34d399;
+    --warn: #fbbf24;
+    --text: #e8ecf4;
+    --muted: #6b7a9a;
+    --glow: rgba(79,156,249,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: -200px;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(79,156,249,0.05) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .page-wrap {
+    position: relative; z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 52px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+    box-shadow: 0 0 24px rgba(79,156,249,0.3);
+  }
+
+  .header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem; font-weight: 400;
+    letter-spacing: -0.5px; line-height: 1.2;
+  }
+
+  .header-text p {
+    font-size: 0.82rem; color: var(--muted);
+    margin-top: 3px; font-weight: 300;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 28px; align-items: start;
+  }
+
+  .section-label {
+    font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--accent);
+    font-weight: 600; margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+  }
+
+  .card + .card { margin-top: 20px; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.78rem; font-weight: 500;
+    color: var(--muted); letter-spacing: 0.3px;
+  }
+
+  label span.unit { font-size: 0.7rem; color: #3f4a62; margin-left: 4px; }
+
+  input[type="number"], select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; padding: 10px 14px;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none; appearance: none; -webkit-appearance: none;
+  }
+
+  input[type="number"]:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,156,249,0.1);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7a9a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px; cursor: pointer;
+  }
+
+  .toggle-group { display: flex; gap: 8px; }
+
+  .toggle-btn {
+    flex: 1; padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s; text-align: center;
+  }
+
+  .toggle-btn.active-yes {
+    background: rgba(79,156,249,0.15);
+    border-color: var(--accent); color: var(--accent);
+  }
+
+  .toggle-btn.active-no {
+    background: rgba(107,122,154,0.1);
+    border-color: #3a4255; color: var(--text);
+  }
+
+  .submit-btn {
+    width: 100%; padding: 15px; margin-top: 24px;
+    background: linear-gradient(135deg, var(--accent), #7ab8ff);
+    border: none; border-radius: 12px;
+    color: #0b0e14;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; letter-spacing: 0.3px;
+    transition: all 0.2s;
+    position: relative; overflow: hidden;
+  }
+
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(79,156,249,0.35); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn.loading { pointer-events: none; opacity: 0.8; }
+
+  .submit-btn .spinner {
+    display: none; width: 18px; height: 18px;
+    border: 2px solid rgba(11,14,20,0.3);
+    border-top-color: #0b0e14;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+
+  .submit-btn.loading .btn-text { display: none; }
+  .submit-btn.loading .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Results Panel */
+  .results-panel { position: sticky; top: 24px; }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    transition: all 0.4s ease;
+  }
+
+  .result-empty { text-align: center; padding: 48px 24px; }
+
+  .result-empty .empty-icon { font-size: 2.5rem; margin-bottom: 14px; opacity: 0.4; }
+
+  .result-empty p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+
+  /* Stage display */
+  .prediction-header {
+    display: none; flex-direction: column;
+    align-items: center; text-align: center;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  /* Tumor stage ring visual */
+  .stage-visual {
+    position: relative;
+    width: 100px; height: 100px;
+    margin-bottom: 16px;
+    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .stage-ring {
+    width: 100%; height: 100%; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    border: 3px solid;
+  }
+
+  .stage-ring.stage-1 {
+    background: rgba(52,211,153,0.10);
+    border-color: var(--safe);
+    box-shadow: 0 0 30px rgba(52,211,153,0.25);
+  }
+
+  .stage-ring.stage-2 {
+    background: rgba(251,191,36,0.10);
+    border-color: var(--warn);
+    box-shadow: 0 0 30px rgba(251,191,36,0.25);
+  }
+
+  .stage-ring.stage-3 {
+    background: rgba(248,113,113,0.10);
+    border-color: var(--danger);
+    box-shadow: 0 0 30px rgba(248,113,113,0.25);
+  }
+
+  .stage-numeral {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem; line-height: 1;
+  }
+
+  .stage-ring.stage-1 .stage-numeral { color: var(--safe); }
+  .stage-ring.stage-2 .stage-numeral { color: var(--warn); }
+  .stage-ring.stage-3 .stage-numeral { color: var(--danger); }
+
+  .stage-word {
+    font-size: 0.6rem; text-transform: uppercase;
+    letter-spacing: 1.5px; font-weight: 600; margin-top: 2px;
+  }
+
+  .stage-ring.stage-1 .stage-word { color: var(--safe); }
+  .stage-ring.stage-2 .stage-word { color: var(--warn); }
+  .stage-ring.stage-3 .stage-word { color: var(--danger); }
+
+  .prediction-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem; margin-bottom: 6px;
+  }
+
+  .prediction-label.stage-1 { color: var(--safe); }
+  .prediction-label.stage-2 { color: var(--warn); }
+  .prediction-label.stage-3 { color: var(--danger); }
+
+  .stage-desc {
+    font-size: 0.8rem; color: var(--muted);
+    line-height: 1.5; margin-top: 4px; max-width: 240px;
+  }
+
+  .confidence-text { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+
+  /* Stage probability bars */
+  .prob-section { display: none; }
+  .prob-section .section-label { margin-bottom: 16px; }
+
+  .prob-item { margin-bottom: 16px; }
+
+  .prob-item-header {
+    display: flex; justify-content: space-between;
+    margin-bottom: 7px; font-size: 0.82rem;
+    align-items: center;
+  }
+
+  .prob-name-wrap { display: flex; align-items: center; gap: 8px; }
+
+  .stage-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .stage-dot.s1 { background: var(--safe); }
+  .stage-dot.s2 { background: var(--warn); }
+  .stage-dot.s3 { background: var(--danger); }
+
+  .prob-item-header .prob-name { color: var(--muted); }
+  .prob-item-header .prob-val { font-weight: 600; }
+
+  .prob-bar-track {
+    height: 6px; background: var(--surface2);
+    border-radius: 99px; overflow: hidden;
+  }
+
+  .prob-bar-fill {
+    height: 100%; border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .prob-bar-fill.s1 { background: linear-gradient(90deg, var(--safe), #6ee7b7); }
+  .prob-bar-fill.s2 { background: linear-gradient(90deg, var(--warn), #fde68a); }
+  .prob-bar-fill.s3 { background: linear-gradient(90deg, var(--danger), #fca5a5); }
+
+  .disclaimer {
+    margin-top: 20px; padding: 12px 14px;
+    background: rgba(167,139,250,0.07);
+    border: 1px solid rgba(167,139,250,0.15);
+    border-radius: 10px;
+    font-size: 0.76rem; color: var(--muted); line-height: 1.6;
+  }
+
+  .disclaimer strong { color: var(--accent2); }
+
+  .range-hint {
+    display: flex; justify-content: space-between;
+    font-size: 0.68rem; color: #3f4a62;
+    margin-top: 3px; padding: 0 2px;
+  }
+
+  .error-msg {
+    display: none;
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 0.82rem; color: var(--danger);
+    margin-top: 16px;
+  }
+
+  @media (max-width: 780px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .results-panel { position: static; }
+    .form-grid { grid-template-columns: 1fr; }
+    .field.full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <header>
+    <div class="logo-mark">🔬</div>
+    <div class="header-text">
+      <h1>Oncology Risk Predictor</h1>
+      <p>Breast Cancer · Tumor Stage Classification · Random Forest Model</p>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- Form -->
+    <div class="form-side">
+      <div class="card">
+        <div class="section-label">Clinical Parameters</div>
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Age at Diagnosis <span class="unit">years</span></label>
+            <input type="number" id="age_at_diagnosis" min="20" max="100" step="0.1" placeholder="e.g. 55.5">
+            <div class="range-hint"><span>20</span><span>96</span></div>
+          </div>
+
+          <div class="field">
+            <label>Tumor Size <span class="unit">mm</span></label>
+            <input type="number" id="tumor_size" min="1" max="200" step="0.1" placeholder="e.g. 25.0">
+          </div>
+
+          <div class="field">
+            <label>Nottingham Prognostic Index</label>
+            <input type="number" id="nottingham_prognostic_index" min="1" max="7" step="0.001" placeholder="e.g. 4.04">
+            <div class="range-hint"><span>1.0</span><span>6.4</span></div>
+          </div>
+
+          <div class="field">
+            <label>Lymph Nodes Examined Positive</label>
+            <input type="number" id="lymph_nodes_examined_positive" min="0" max="50" step="0.1" placeholder="e.g. 0">
+          </div>
+
+          <div class="field">
+            <label>Neoplasm Histologic Grade</label>
+            <select id="neoplasm_histologic_grade">
+              <option value="" disabled selected>Select grade</option>
+              <option value="1">Grade 1 — Well differentiated</option>
+              <option value="2">Grade 2 — Moderately differentiated</option>
+              <option value="3">Grade 3 — Poorly differentiated</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>AURKA Expression <span class="unit">z-score</span></label>
+            <input type="number" id="aurka" step="0.0001" placeholder="e.g. -0.085">
+            <div class="range-hint"><span>-2.27</span><span>4.82</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Receptor Status</div>
+        <div class="form-grid">
+
+          <div class="field">
+            <label>ER Status</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" data-val="Positive" onclick="setToggle('er_status', 'Positive', this)">Positive</button>
+              <button class="toggle-btn" data-val="Negative" onclick="setToggle('er_status', 'Negative', this)">Negative</button>
+            </div>
+            <input type="hidden" id="er_status" value="">
+          </div>
+
+          <div class="field">
+            <label>HER2 Status</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" data-val="Positive" onclick="setToggle('her2_status', 'Positive', this)">Positive</button>
+              <button class="toggle-btn" data-val="Negative" onclick="setToggle('her2_status', 'Negative', this)">Negative</button>
+            </div>
+            <input type="hidden" id="her2_status" value="">
+          </div>
+
+          <div class="field">
+            <label>Menopausal State</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" data-val="Post" onclick="setToggle('inferred_menopausal_state', 'Post', this)">Post</button>
+              <button class="toggle-btn" data-val="Pre" onclick="setToggle('inferred_menopausal_state', 'Pre', this)">Pre</button>
+            </div>
+            <input type="hidden" id="inferred_menopausal_state" value="">
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Treatment History</div>
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Chemotherapy</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" onclick="setTreatment('chemotherapy', 1, this)">Yes</button>
+              <button class="toggle-btn" onclick="setTreatment('chemotherapy', 0, this)">No</button>
+            </div>
+            <input type="hidden" id="chemotherapy" value="">
+          </div>
+
+          <div class="field">
+            <label>Hormone Therapy</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" onclick="setTreatment('hormone_therapy', 1, this)">Yes</button>
+              <button class="toggle-btn" onclick="setTreatment('hormone_therapy', 0, this)">No</button>
+            </div>
+            <input type="hidden" id="hormone_therapy" value="">
+          </div>
+
+          <div class="field">
+            <label>Radio Therapy</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" onclick="setTreatment('radio_therapy', 1, this)">Yes</button>
+              <button class="toggle-btn" onclick="setTreatment('radio_therapy', 0, this)">No</button>
+            </div>
+            <input type="hidden" id="radio_therapy" value="">
+          </div>
+
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="runPrediction()">
+        <span class="btn-text">Run Prediction</span>
+        <div class="spinner"></div>
+      </button>
+
+      <div class="error-msg" id="error-msg"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-panel">
+      <div class="result-card" id="result-card">
+        <div class="result-empty" id="result-empty">
+          <div class="empty-icon">⚕️</div>
+          <p>Fill in the patient parameters and click <strong>Run Prediction</strong> to see the predicted tumor stage.</p>
+        </div>
+
+        <div class="prediction-header" id="prediction-header">
+          <div class="stage-visual">
+            <div class="stage-ring" id="stage-ring">
+              <span class="stage-numeral" id="stage-numeral"></span>
+              <span class="stage-word">Stage</span>
+            </div>
+          </div>
+          <div class="prediction-label" id="pred-label"></div>
+          <div class="stage-desc" id="stage-desc"></div>
+          <div class="confidence-text" id="pred-conf"></div>
+        </div>
+
+        <div class="prob-section" id="prob-section">
+          <div class="section-label">Stage Probability Breakdown</div>
+          <div id="prob-bars"></div>
+        </div>
+
+        <div class="disclaimer">
+          <strong>⚠ Research Use Only.</strong> This tool uses a machine learning model for research purposes only. Not a substitute for clinical judgment or medical advice.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const state = {
+    er_status: '', her2_status: '', inferred_menopausal_state: '',
+    chemotherapy: '', hormone_therapy: '', radio_therapy: ''
+  };
+
+  function setToggle(field, value, btn) {
+    state[field] = value;
+    document.getElementById(field).value = value;
+    btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active-yes','active-no'));
+    btn.classList.add('active-yes');
+  }
+
+  function setTreatment(field, value, btn) {
+    state[field] = value;
+    document.getElementById(field).value = value;
+    btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active-yes','active-no'));
+    btn.classList.add(value === 1 ? 'active-yes' : 'active-no');
+  }
+
+  // Stage metadata
+  const stageInfo = {
+    1: {
+      numeral: 'I',
+      cls: 'stage-1',
+      dotCls: 's1',
+      label: 'Tumor Stage I',
+      desc: 'Early-stage tumor. Cancer is small and localized with favorable prognosis.',
+      barCls: 's1'
+    },
+    2: {
+      numeral: 'II',
+      cls: 'stage-2',
+      dotCls: 's2',
+      label: 'Tumor Stage II',
+      desc: 'Intermediate-stage tumor. Cancer may have spread to nearby lymph nodes.',
+      barCls: 's2'
+    },
+    3: {
+      numeral: 'III',
+      cls: 'stage-3',
+      dotCls: 's3',
+      label: 'Tumor Stage III',
+      desc: 'Advanced local tumor. Cancer has spread more extensively to nearby tissue or nodes.',
+      barCls: 's3'
+    }
+  };
+
+  async function runPrediction() {
+    document.getElementById('error-msg').style.display = 'none';
+
+    const fields = ['nottingham_prognostic_index','tumor_size','lymph_nodes_examined_positive',
+      'neoplasm_histologic_grade','aurka','age_at_diagnosis'];
+    const toggleFields = ['chemotherapy','hormone_therapy','radio_therapy','er_status','her2_status','inferred_menopausal_state'];
+
+    for (const f of fields) {
+      if (document.getElementById(f).value === '') {
+        showError(`Please fill in: ${f.replace(/_/g,' ')}`); return;
+      }
+    }
+    for (const f of toggleFields) {
+      if (document.getElementById(f).value === '') {
+        showError(`Please select: ${f.replace(/_/g,' ')}`); return;
+      }
+    }
+
+    const payload = {};
+    [...fields, ...toggleFields].forEach(f => { payload[f] = document.getElementById(f).value; });
+
+    const btn = document.querySelector('.submit-btn');
+    btn.classList.add('loading');
+
+    try {
+      const res = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) { showError(data.error || 'Prediction failed'); return; }
+      showResult(data);
+    } catch (e) {
+      showError('Network error: ' + e.message);
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = '⚠ ' + msg;
+    el.style.display = 'block';
+  }
+
+  function showResult(data) {
+    document.getElementById('result-empty').style.display = 'none';
+
+    const pred = Math.round(parseFloat(data.prediction));
+    const info = stageInfo[pred] || stageInfo[1];
+
+    // Stage ring
+    const ring = document.getElementById('stage-ring');
+    ring.className = 'stage-ring ' + info.cls;
+    document.getElementById('stage-numeral').textContent = info.numeral;
+
+    // Re-trigger pop animation
+    const visual = document.querySelector('.stage-visual');
+    visual.style.animation = 'none';
+    void visual.offsetWidth;
+    visual.style.animation = '';
+
+    // Label & desc
+    const label = document.getElementById('pred-label');
+    label.className = 'prediction-label ' + info.cls;
+    label.textContent = info.label;
+
+    document.getElementById('stage-desc').textContent = info.desc;
+    document.getElementById('pred-conf').textContent = `${data.confidence.toFixed(1)}% model confidence`;
+
+    document.getElementById('prediction-header').style.display = 'flex';
+
+    // Probability bars
+    const barsContainer = document.getElementById('prob-bars');
+    barsContainer.innerHTML = '';
+
+    // Map class keys to stage numbers
+    const classToStage = { '1': 1, '2': 2, '3': 3, '1.0': 1, '2.0': 2, '3.0': 3 };
+
+    Object.entries(data.probabilities)
+      .sort((a, b) => parseFloat(a[0]) - parseFloat(b[0]))
+      .forEach(([cls, prob]) => {
+        const stageNum = classToStage[cls] || parseInt(cls);
+        const si = stageInfo[stageNum] || stageInfo[1];
+        const pct = (prob * 100).toFixed(1);
+
+        barsContainer.innerHTML += `
+          <div class="prob-item">
+            <div class="prob-item-header">
+              <div class="prob-name-wrap">
+                <div class="stage-dot ${si.dotCls}"></div>
+                <span class="prob-name">Stage ${si.numeral}</span>
+              </div>
+              <span class="prob-val" style="color:var(--text)">${pct}%</span>
+            </div>
+            <div class="prob-bar-track">
+              <div class="prob-bar-fill ${si.barCls}" style="width:0%" data-target="${pct}"></div>
+            </div>
+          </div>`;
+      });
+
+    document.getElementById('prob-section').style.display = 'block';
+
+    setTimeout(() => {
+      document.querySelectorAll('.prob-bar-fill').forEach(bar => {
+        bar.style.width = bar.dataset.target + '%';
+      });
+    }, 50);
+  }
+</script>
+</body>
+</html>2
